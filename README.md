@@ -38,6 +38,7 @@ This requires you to restart Minecraft or unintended side effects might occur!
 Beware, this is my first mod for Minecraft! 
 
 Code probably is neither beautiful to look at nor the most performant or easiest way to implement what this mod does.
+
 I'm open for any input on that behalf, just let me know via the [Issues tab](https://github.com/Eyeronic/DynamicTorches/issues). (I'll probably change that and provide some kind of 'business mail' or such in the future ^^)
 
 ## Copyright
