@@ -28,9 +28,9 @@ This requires you to restart Minecraft or unintended side effects might occur!
 
 - [ ] Fix rendering issue when changing torch behaviour and not restarting Minecraft.
 - [ ] If possible add a way to reset torch metadata when deactivating Dynamic Torches mod.
+- [ ] Manually change a torch's position (via metadata) by right-clicking the torch.
 - [ ] Automatically update torch metadata on loading a save game which previously didn't use Dynamic Torches (aka move all torches into corners where possible).
 - [ ] Port to Minecraft 1.11.2 (probably quite far in the future)
-- [ ] Manually change a torch's position (via metadata) by right-clicking the torch.
 - [ ] Add compatibility with HitchH1k3r's [Torch Levers](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1288257-1-7-10-forge-torch-levers-and-more-version-1-4-2) mod which is unfortunately pretty much dead but still can be downloaded.
 
 ## Notes
