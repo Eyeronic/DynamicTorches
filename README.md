@@ -11,8 +11,8 @@ This requires you to restart Minecraft or unintended side effects might occur!
 
 ## Dependencies
 
-Minecraft 1.7.10
-[Minecraft Forge 1.7.10-10.13.4.1558](http://files.minecraftforge.net/maven/net/minecraftforge/forge/index_1.7.10.html)
+- Minecraft 1.7.10
+- [Minecraft Forge 1.7.10-10.13.4.1558](http://files.minecraftforge.net/maven/net/minecraftforge/forge/index_1.7.10.html)
 
 ## Download
 
