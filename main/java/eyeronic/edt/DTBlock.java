@@ -9,9 +9,13 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockTorch;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
+import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import eyeronic.edt.init.DynamicTorches;
@@ -287,7 +291,7 @@ public class DTBlock extends BlockTorch {
 		}
 		else
 		{
-			this.moveTorchToNextValidPosition(world, x, y, z);
+			this.moveTorchAutomatically(world, x, y, z);
 		}
 	}
 
@@ -321,25 +325,25 @@ public class DTBlock extends BlockTorch {
 			world.setBlockMetadataWithNotify(x, y, z, 6, 2);
 		}
 		else if (world.isSideSolid(x - 1, y, z, EAST, true) && world.getBlockMetadata(x, y, z) != 5)
-        {
-            world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-        }
-        else if (world.isSideSolid(x + 1, y, z, WEST, true) && world.getBlockMetadata(x, y, z) != 5)
-        {
-            world.setBlockMetadataWithNotify(x, y, z, 2, 2);
-        }
-        else if (world.isSideSolid(x, y, z - 1, SOUTH, true) && world.getBlockMetadata(x, y, z) != 5)
-        {
-            world.setBlockMetadataWithNotify(x, y, z, 3, 2);
-        }
-        else if (world.isSideSolid(x, y, z + 1, NORTH, true) && world.getBlockMetadata(x, y, z) != 5)
-        {
-            world.setBlockMetadataWithNotify(x, y, z, 4, 2);
-        }
-        else if (this.canPlaceOnTop(world, x, y - 1, z))
-        {
-            world.setBlockMetadataWithNotify(x, y, z, 5, 2);
-        }
+		{
+			world.setBlockMetadataWithNotify(x, y, z, 1, 2);
+		}
+		else if (world.isSideSolid(x + 1, y, z, WEST, true) && world.getBlockMetadata(x, y, z) != 5)
+		{
+			world.setBlockMetadataWithNotify(x, y, z, 2, 2);
+		}
+		else if (world.isSideSolid(x, y, z - 1, SOUTH, true) && world.getBlockMetadata(x, y, z) != 5)
+		{
+			world.setBlockMetadataWithNotify(x, y, z, 3, 2);
+		}
+		else if (world.isSideSolid(x, y, z + 1, NORTH, true) && world.getBlockMetadata(x, y, z) != 5)
+		{
+			world.setBlockMetadataWithNotify(x, y, z, 4, 2);
+		}
+		else if (this.canPlaceOnTop(world, x, y - 1, z))
+		{
+			world.setBlockMetadataWithNotify(x, y, z, 5, 2);
+		}
 		else
 		{
 			super.onBlockAdded(world, x, y, z);
@@ -357,7 +361,7 @@ public class DTBlock extends BlockTorch {
 	 * @param y
 	 * @param z
 	 */
-	private void moveTorchToNextValidPosition(World world, int x, int y, int z) 
+	private void moveTorchAutomatically(World world, int x, int y, int z) 
 	{
 		//South-East
 		if (world.isSideSolid(x - 1, y, z, EAST, true) && world.isSideSolid(x, y, z - 1, SOUTH, true))
@@ -380,25 +384,25 @@ public class DTBlock extends BlockTorch {
 			world.setBlockMetadataWithNotify(x, y, z, 6, 2);
 		}
 		else if (world.isSideSolid(x - 1, y, z, EAST, true))
-        {
-            world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-        }
-        else if (world.isSideSolid(x + 1, y, z, WEST, true))
-        {
-            world.setBlockMetadataWithNotify(x, y, z, 2, 2);
-        }
-        else if (world.isSideSolid(x, y, z - 1, SOUTH, true))
-        {
-            world.setBlockMetadataWithNotify(x, y, z, 3, 2);
-        }
-        else if (world.isSideSolid(x, y, z + 1, NORTH, true))
-        {
-            world.setBlockMetadataWithNotify(x, y, z, 4, 2);
-        }
-        else if (this.canPlaceOnTop(world, x, y - 1, z))
-        {
-            world.setBlockMetadataWithNotify(x, y, z, 5, 2);
-        }
+		{
+			world.setBlockMetadataWithNotify(x, y, z, 1, 2);
+		}
+		else if (world.isSideSolid(x + 1, y, z, WEST, true))
+		{
+			world.setBlockMetadataWithNotify(x, y, z, 2, 2);
+		}
+		else if (world.isSideSolid(x, y, z - 1, SOUTH, true))
+		{
+			world.setBlockMetadataWithNotify(x, y, z, 3, 2);
+		}
+		else if (world.isSideSolid(x, y, z + 1, NORTH, true))
+		{
+			world.setBlockMetadataWithNotify(x, y, z, 4, 2);
+		}
+		else if (this.canPlaceOnTop(world, x, y - 1, z))
+		{
+			world.setBlockMetadataWithNotify(x, y, z, 5, 2);
+		}
 		else
 		{
 			super.onBlockAdded(world, x, y, z);
@@ -407,19 +411,181 @@ public class DTBlock extends BlockTorch {
 
 	@Override
 	public void onNeighborBlockChange(World world, int x, int y, int z, Block block) {
-		
+
 		//should torches drop or move to another valid position?
-		
+
 		//true if torches should not move to any valid position and should not drop right now
-		if(!DynamicTorches.shouldTorchesSwitchToGround && !this.func_150108_b(world, x, y, z, block)) 
+		if(!DynamicTorches.shouldTorchesSwitchToGround && !this.func_150108_b(world, x, y, z, block) && !this.getClass().equals(block.getClass())) 
 		{
 			this.onBlockAdded(world, x, y, z);			
 		}
-		else //true if torches should move to any valid position
+		else if(!this.getClass().equals(block.getClass()))//true if torches should move to any valid position
 		{
 			//resetting metadata to 0 for rotation update
 			world.setBlockMetadataWithNotify(x, y, z, 0, 2);
 			this.onBlockAdded(world, x, y, z);
+		}
+	}	
+
+	//TODO: rework to use dynamic functions
+	//TODO: different history for different combination of solid surroundings?
+	public void moveTorchManually(World world, int x, int y, int z)
+	{
+		int metadata = world.getBlockMetadata(x, y, z);
+
+		switch(metadata)
+		{
+		//East
+		case 1:
+			if(world.isSideSolid(x, y, z + 1, NORTH) && DynamicTorches.instance.getMetadataHistory()[2] != 6)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 6, 2);
+				DynamicTorches.instance.updateMetadataHistory(6);
+			}
+			else if(world.isSideSolid(x, y, z - 1, SOUTH) && DynamicTorches.instance.getMetadataHistory()[2] != 8)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 8, 2);
+				DynamicTorches.instance.updateMetadataHistory(8);
+			}
+			else if(this.canPlaceOnTop(world, x, y - 1, z) && DynamicTorches.instance.getMetadataHistory()[2] != 5)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 5, 2);
+				DynamicTorches.instance.updateMetadataHistory(5);
+			}
+			break;
+		//West
+		case 2:
+			if(world.isSideSolid(x, y, z + 1, NORTH) && DynamicTorches.instance.getMetadataHistory()[2] != 7)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 7, 2);
+				DynamicTorches.instance.updateMetadataHistory(7);
+			}
+			else if(world.isSideSolid(x, y, z - 1, SOUTH) && DynamicTorches.instance.getMetadataHistory()[2] != 9)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 9, 2);
+				DynamicTorches.instance.updateMetadataHistory(9);
+			}
+			else if(this.canPlaceOnTop(world, x, y - 1, z) && DynamicTorches.instance.getMetadataHistory()[2] != 5)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 5, 2);
+				DynamicTorches.instance.updateMetadataHistory(5);
+			}
+			break;
+		//South
+		case 3:
+			if(world.isSideSolid(x - 1, y, z, EAST) && DynamicTorches.instance.getMetadataHistory()[2] != 8)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 8, 2);
+				DynamicTorches.instance.updateMetadataHistory(8);
+			}
+			else if(world.isSideSolid(x + 1, y, z, WEST) && DynamicTorches.instance.getMetadataHistory()[2] != 9)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 9, 2);
+				DynamicTorches.instance.updateMetadataHistory(9);
+			}
+			else if(this.canPlaceOnTop(world, x, y - 1, z) && DynamicTorches.instance.getMetadataHistory()[2] != 5)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 5, 2);
+				DynamicTorches.instance.updateMetadataHistory(5);
+			}
+			break;
+		//North
+		case 4:
+			if(world.isSideSolid(x - 1, y, z, EAST) && DynamicTorches.instance.getMetadataHistory()[2] != 6)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 6, 2);
+				DynamicTorches.instance.updateMetadataHistory(6);
+			}
+			else if(world.isSideSolid(x + 1, y, z, WEST) && DynamicTorches.instance.getMetadataHistory()[2] != 7)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 7, 2);
+				DynamicTorches.instance.updateMetadataHistory(7);
+			}
+			else if(this.canPlaceOnTop(world, x, y - 1, z) && DynamicTorches.instance.getMetadataHistory()[2] != 5)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 5, 2);
+				DynamicTorches.instance.updateMetadataHistory(5);
+			}
+			break;
+		//Top
+		case 5:
+			if(world.isSideSolid(x - 1, y, z, EAST) && DynamicTorches.instance.getMetadataHistory()[2] != 1 && DynamicTorches.instance.getMetadataHistory()[0] != 1)
+			{
+				System.out.println("TOP -> EAST!");
+				world.setBlockMetadataWithNotify(x, y, z, 1, 2);
+				DynamicTorches.instance.updateMetadataHistory(1);
+			}
+			else if(world.isSideSolid(x + 1, y, z, WEST) && DynamicTorches.instance.getMetadataHistory()[2] != 2)
+			{
+				System.out.println("TOP -> WEST!");
+				world.setBlockMetadataWithNotify(x, y, z, 2, 2);
+				DynamicTorches.instance.updateMetadataHistory(2);
+			}
+			else if(world.isSideSolid(x, y, z - 1, SOUTH) && DynamicTorches.instance.getMetadataHistory()[2] != 3)
+			{
+				System.out.println("TOP -> SOUTH!");
+				world.setBlockMetadataWithNotify(x, y, z, 3, 2);
+				DynamicTorches.instance.updateMetadataHistory(3);
+			}
+			else if(world.isSideSolid(x, y, z + 1, NORTH) && DynamicTorches.instance.getMetadataHistory()[2] != 4)
+			{
+				System.out.println("TOP -> NORTH!");
+				world.setBlockMetadataWithNotify(x, y, z, 4, 2);
+				DynamicTorches.instance.updateMetadataHistory(4);
+			}
+			break;
+		//NE
+		case 6:
+			if(DynamicTorches.instance.getMetadataHistory()[2] != 4)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 4, 2);
+				DynamicTorches.instance.updateMetadataHistory(4);
+			}
+			else
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 1, 2);
+				DynamicTorches.instance.updateMetadataHistory(1);
+			}
+			break;
+		//NW
+		case 7:
+			if(DynamicTorches.instance.getMetadataHistory()[2] != 2)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 2, 2);
+				DynamicTorches.instance.updateMetadataHistory(2);
+			}
+			else
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 4, 2);
+				DynamicTorches.instance.updateMetadataHistory(4);
+			}
+			break;
+		//SE
+		case 8:
+			if(DynamicTorches.instance.getMetadataHistory()[2] != 1)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 1, 2);
+				DynamicTorches.instance.updateMetadataHistory(1);
+			}
+			else
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 3, 2);
+				DynamicTorches.instance.updateMetadataHistory(3);
+			}
+			break;
+		//SW
+		case 9:
+			if(DynamicTorches.instance.getMetadataHistory()[2] != 3)
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 3, 2);
+				DynamicTorches.instance.updateMetadataHistory(3);
+			}
+			else
+			{
+				world.setBlockMetadataWithNotify(x, y, z, 2, 2);
+				DynamicTorches.instance.updateMetadataHistory(2);
+			}
+			break;
 		}
 	}
 

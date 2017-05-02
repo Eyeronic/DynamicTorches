@@ -1,11 +1,16 @@
 package eyeronic.edt.init;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -34,12 +39,15 @@ public class DynamicTorches {
 
 	public static boolean dynamicTorchesEnabled = true;
 	public static boolean shouldTorchesSwitchToGround = false;
+	public static boolean isFirstRun = true;
 
 	@SidedProxy(clientSide = "eyeronic.edt.proxy.ClientProxy", serverSide = "eyeronic.edt.proxy.ServerProxy")
 	public static ServerProxy proxy;
 
 	@Mod.Instance(Reference.MOD_ID)
 	public static DynamicTorches instance;
+	
+	private int[] metadataHistory = {0, 0, 0, 0};
 
 	@EventHandler
 	/**
@@ -63,6 +71,7 @@ public class DynamicTorches {
 	public void init(FMLInitializationEvent event)
 	{
 		FMLCommonHandler.instance().bus().register(instance);
+		MinecraftForge.EVENT_BUS.register(instance);
 
 		if(dynamicTorchesEnabled)
 		{
@@ -101,6 +110,49 @@ public class DynamicTorches {
 			syncConfig();
 		}
 	}
+	
+	@SubscribeEvent
+	public void onPlayerInteract(PlayerInteractEvent event)
+	{
+		EntityPlayer player = event.entityPlayer;
+		Action action = event.action;
+		World world = event.world;
+		int x = event.x;
+		int y = event.y;
+		int z = event.z;
+		Block block = world.getBlock(x, y, z);
+		
+		if(player.isSneaking() && action.equals(Action.RIGHT_CLICK_BLOCK))
+		{
+			System.out.println("sneaky right click");
+			if(block.getClass().equals(DTBlock.class))
+			{
+				((DTBlock) block).moveTorchManually(world, x, y, z);
+				event.setCanceled(true);
+			}
+		}
+	}
+	
+	//TODO: probably different data structure
+	//TODO: increase history? 9 possible states --> check maximum of 8 previous metadata values for new metadata value not present
+	//TODO: Reset metadata if new torch is clicked? check world position to find out if clicked block changed
+	public void updateMetadataHistory(int metadata)
+	{
+		System.out.println("Old History: " + metadataHistory[0] + ", " + metadataHistory[1] + ", " + metadataHistory[2] + ", " + metadataHistory[3]);
+		int[] tmpHistory = new int[4];
+		for(int i = 0; i<3; i++)
+		{
+			tmpHistory[i] = metadataHistory[i+1];
+		}
+		tmpHistory[3] = metadata;
+		metadataHistory = tmpHistory;
+		System.out.println("New History: " + metadataHistory[0] + ", " + metadataHistory[1] + ", " + metadataHistory[2] + ", " + metadataHistory[3]);
+	}
+	
+	public int[] getMetadataHistory()
+	{
+		return metadataHistory;
+	}
 
 	/**
 	 * Load/save variables from/to config file
@@ -125,10 +177,18 @@ public class DynamicTorches {
 							"true",
 							"Whether torches should switch to ground position if wall is broken and vice versa.\nRequires you to restart Minecraft.",
 							Property.Type.BOOLEAN);
+			
+			Property isFirstRunProp =
+					config.get(Configuration.CATEGORY_SPLITTER + "first run",
+							"isFirstRun",
+							"true",
+							"Whether this is the first time this mod is used",
+							Property.Type.BOOLEAN);
 
 			// Get the boolean value, also set the property value to boolean
 			dynamicTorchesEnabled = isDynamicTorchesEnabledProp.getBoolean();
 			shouldTorchesSwitchToGround = shouldTorchesMoveProp.getBoolean();
+			isFirstRun = isFirstRunProp.getBoolean();
 		} 
 		catch (Exception e) 
 		{
