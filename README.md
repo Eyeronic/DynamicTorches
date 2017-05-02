@@ -16,7 +16,9 @@ This requires you to restart Minecraft or unintended side effects might occur!
 
 ## Download
 
-[Latest Release](https://github.com/Eyeronic/DynamicTorches/releases/tag/v0.7)
+[Latest Release](https://github.com/Eyeronic/DynamicTorches/releases/tag/v0.7.1)
+
+[Latest Stable](https://github.com/Eyeronic/DynamicTorches/releases/tag/v0.7)
 
 ## Known Issues
 
