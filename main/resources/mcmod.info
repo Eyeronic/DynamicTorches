@@ -3,7 +3,7 @@
   "modid": "edt",
   "name": "Dynamic Torches",
   "description": "Satisfies your OCD and automatically positions torches exactly in a corner where possible.",
-  "version": "0.7",
+  "version": "0.7.2",
   "mcversion": "${mcversion}",
   "url": "https://github.com/Eyeronic/DynamicTorches",
   "updateUrl": "",

@@ -7,22 +7,17 @@ import static net.minecraftforge.common.util.ForgeDirection.WEST;
 
 import java.util.Random;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockTorch;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
-import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import eyeronic.edt.init.DynamicTorches;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockTorch;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
 
 public class DTBlock extends BlockTorch {
 
-	//private CTTileEntity tileEntity;
 	private int renderType;
 
 	public DTBlock() 
@@ -164,19 +159,6 @@ public class DTBlock extends BlockTorch {
 		this.renderType = newRenderType;
 	}
 
-	/*@Override
-	public TileEntity createTileEntity(World world, int metadata) 
-	{
-		this.tileEntity = new CTTileEntity(metadata);
-		System.out.println("Created CTBlock.tileEntity " + tileEntity);
-		return this.tileEntity;
-	}
-
-	public TileEntity getTileEntity()
-	{
-		return this.tileEntity;
-	}*/
-
 	@Override
 	/**
 	 * Called when a block is placed using its ItemBlock. Args: World, X, Y, Z, side, hitX, hitY, hitZ, block metadata
@@ -271,11 +253,6 @@ public class DTBlock extends BlockTorch {
 			}
 		}
 
-		/*if(this.tileEntity != null)
-			this.tileEntity.setMetadata(j1);
-		else
-			this.createTileEntity(p_149660_1_, j1);
-		 */
 		return j1;
 	}
 
@@ -425,168 +402,44 @@ public class DTBlock extends BlockTorch {
 			world.setBlockMetadataWithNotify(x, y, z, 0, 2);
 			this.onBlockAdded(world, x, y, z);
 		}
+		
+		//resetting available torch positions to choose from as these might have changed
+		DynamicTorches.instance.resetMetadataOptions(world, x, y, z);
 	}	
 
-	//TODO: rework to use dynamic functions
-	//TODO: different history for different combination of solid surroundings?
-	public void moveTorchManually(World world, int x, int y, int z)
+	/**
+	 * Called when the player is sneaking and right clicking a torch. Moves the torch to the next available position.
+	 * 
+	 * @param world the current world
+	 * @param x x coordinate of the torch
+	 * @param y y coordinate of the torch
+	 * @param z z coordinate of the torch
+	 * @param metadataOptions the array of available positions the torch can be placed at
+	 */
+	public void moveTorchManually(World world, int x, int y, int z, int[] metadataOptions)
 	{
-		int metadata = world.getBlockMetadata(x, y, z);
-
-		switch(metadata)
-		{
-		//East
-		case 1:
-			if(world.isSideSolid(x, y, z + 1, NORTH) && DynamicTorches.instance.getMetadataHistory()[2] != 6)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 6, 2);
-				DynamicTorches.instance.updateMetadataHistory(6);
-			}
-			else if(world.isSideSolid(x, y, z - 1, SOUTH) && DynamicTorches.instance.getMetadataHistory()[2] != 8)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 8, 2);
-				DynamicTorches.instance.updateMetadataHistory(8);
-			}
-			else if(this.canPlaceOnTop(world, x, y - 1, z) && DynamicTorches.instance.getMetadataHistory()[2] != 5)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 5, 2);
-				DynamicTorches.instance.updateMetadataHistory(5);
-			}
-			break;
-		//West
-		case 2:
-			if(world.isSideSolid(x, y, z + 1, NORTH) && DynamicTorches.instance.getMetadataHistory()[2] != 7)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 7, 2);
-				DynamicTorches.instance.updateMetadataHistory(7);
-			}
-			else if(world.isSideSolid(x, y, z - 1, SOUTH) && DynamicTorches.instance.getMetadataHistory()[2] != 9)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 9, 2);
-				DynamicTorches.instance.updateMetadataHistory(9);
-			}
-			else if(this.canPlaceOnTop(world, x, y - 1, z) && DynamicTorches.instance.getMetadataHistory()[2] != 5)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 5, 2);
-				DynamicTorches.instance.updateMetadataHistory(5);
-			}
-			break;
-		//South
-		case 3:
-			if(world.isSideSolid(x - 1, y, z, EAST) && DynamicTorches.instance.getMetadataHistory()[2] != 8)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 8, 2);
-				DynamicTorches.instance.updateMetadataHistory(8);
-			}
-			else if(world.isSideSolid(x + 1, y, z, WEST) && DynamicTorches.instance.getMetadataHistory()[2] != 9)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 9, 2);
-				DynamicTorches.instance.updateMetadataHistory(9);
-			}
-			else if(this.canPlaceOnTop(world, x, y - 1, z) && DynamicTorches.instance.getMetadataHistory()[2] != 5)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 5, 2);
-				DynamicTorches.instance.updateMetadataHistory(5);
-			}
-			break;
-		//North
-		case 4:
-			if(world.isSideSolid(x - 1, y, z, EAST) && DynamicTorches.instance.getMetadataHistory()[2] != 6)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 6, 2);
-				DynamicTorches.instance.updateMetadataHistory(6);
-			}
-			else if(world.isSideSolid(x + 1, y, z, WEST) && DynamicTorches.instance.getMetadataHistory()[2] != 7)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 7, 2);
-				DynamicTorches.instance.updateMetadataHistory(7);
-			}
-			else if(this.canPlaceOnTop(world, x, y - 1, z) && DynamicTorches.instance.getMetadataHistory()[2] != 5)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 5, 2);
-				DynamicTorches.instance.updateMetadataHistory(5);
-			}
-			break;
-		//Top
-		case 5:
-			if(world.isSideSolid(x - 1, y, z, EAST) && DynamicTorches.instance.getMetadataHistory()[2] != 1 && DynamicTorches.instance.getMetadataHistory()[0] != 1)
-			{
-				System.out.println("TOP -> EAST!");
-				world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-				DynamicTorches.instance.updateMetadataHistory(1);
-			}
-			else if(world.isSideSolid(x + 1, y, z, WEST) && DynamicTorches.instance.getMetadataHistory()[2] != 2)
-			{
-				System.out.println("TOP -> WEST!");
-				world.setBlockMetadataWithNotify(x, y, z, 2, 2);
-				DynamicTorches.instance.updateMetadataHistory(2);
-			}
-			else if(world.isSideSolid(x, y, z - 1, SOUTH) && DynamicTorches.instance.getMetadataHistory()[2] != 3)
-			{
-				System.out.println("TOP -> SOUTH!");
-				world.setBlockMetadataWithNotify(x, y, z, 3, 2);
-				DynamicTorches.instance.updateMetadataHistory(3);
-			}
-			else if(world.isSideSolid(x, y, z + 1, NORTH) && DynamicTorches.instance.getMetadataHistory()[2] != 4)
-			{
-				System.out.println("TOP -> NORTH!");
-				world.setBlockMetadataWithNotify(x, y, z, 4, 2);
-				DynamicTorches.instance.updateMetadataHistory(4);
-			}
-			break;
-		//NE
-		case 6:
-			if(DynamicTorches.instance.getMetadataHistory()[2] != 4)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 4, 2);
-				DynamicTorches.instance.updateMetadataHistory(4);
-			}
-			else
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-				DynamicTorches.instance.updateMetadataHistory(1);
-			}
-			break;
-		//NW
-		case 7:
-			if(DynamicTorches.instance.getMetadataHistory()[2] != 2)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 2, 2);
-				DynamicTorches.instance.updateMetadataHistory(2);
-			}
-			else
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 4, 2);
-				DynamicTorches.instance.updateMetadataHistory(4);
-			}
-			break;
-		//SE
-		case 8:
-			if(DynamicTorches.instance.getMetadataHistory()[2] != 1)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-				DynamicTorches.instance.updateMetadataHistory(1);
-			}
-			else
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 3, 2);
-				DynamicTorches.instance.updateMetadataHistory(3);
-			}
-			break;
-		//SW
-		case 9:
-			if(DynamicTorches.instance.getMetadataHistory()[2] != 3)
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 3, 2);
-				DynamicTorches.instance.updateMetadataHistory(3);
-			}
-			else
-			{
-				world.setBlockMetadataWithNotify(x, y, z, 2, 2);
-				DynamicTorches.instance.updateMetadataHistory(2);
-			}
-			break;
-		}
+		int nextMetadata = getNextMetadata(metadataOptions, metadataOptions[9]);
+		
+		world.setBlockMetadataWithNotify(x, y, z, nextMetadata, 2);
+		DynamicTorches.instance.updateOptions(world, x, y, z);
+	}
+	
+	/**
+	 * Returns the next available position for the given options and the current position
+	 * 
+	 * @param metadataOptions the available positions
+	 * @param currentMetadata the current torch position (which is equal to the next position in metadataOptions[])
+	 * @return the next available position (alias next metadata value the torch should be given)
+	 */
+	private int getNextMetadata(int[] metadataOptions, int currentMetadata)
+	{		
+		if(metadataOptions[currentMetadata] != 0 && currentMetadata != 9)
+			return metadataOptions[currentMetadata];
+		else if(currentMetadata != 9)
+			return getNextMetadata(metadataOptions, currentMetadata+1);
+		else
+			return getNextMetadata(metadataOptions, 0);
+			
 	}
 
 	/**

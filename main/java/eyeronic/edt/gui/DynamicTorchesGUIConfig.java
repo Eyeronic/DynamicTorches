@@ -1,16 +1,15 @@
 package eyeronic.edt.gui;
 
-import java.util.Arrays;
 import java.util.List;
 
+import cpw.mods.fml.client.config.GuiConfig;
+import eyeronic.edt.Reference;
+import eyeronic.edt.init.DynamicTorches;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
-import cpw.mods.fml.client.config.GuiConfig;
-import eyeronic.edt.Reference;
-import eyeronic.edt.init.DynamicTorches;
 
 public class DynamicTorchesGUIConfig extends GuiConfig {
 	public DynamicTorchesGUIConfig(GuiScreen parentScreen)

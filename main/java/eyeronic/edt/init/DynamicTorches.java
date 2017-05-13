@@ -11,6 +11,12 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;
+
+import static net.minecraftforge.common.util.ForgeDirection.EAST;
+import static net.minecraftforge.common.util.ForgeDirection.WEST;
+import static net.minecraftforge.common.util.ForgeDirection.SOUTH;
+import static net.minecraftforge.common.util.ForgeDirection.NORTH;
+
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -24,6 +30,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.ExistingSubstitutionException;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.GameRegistry.Type;
+
 import eyeronic.edt.DTBlock;
 import eyeronic.edt.DTItem;
 import eyeronic.edt.Reference;
@@ -47,7 +54,8 @@ public class DynamicTorches {
 	@Mod.Instance(Reference.MOD_ID)
 	public static DynamicTorches instance;
 	
-	private int[] metadataHistory = {0, 0, 0, 0};
+	private int[] metadataOptions = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	private int oldX, oldY, oldZ;
 
 	@EventHandler
 	/**
@@ -124,34 +132,118 @@ public class DynamicTorches {
 		
 		if(player.isSneaking() && action.equals(Action.RIGHT_CLICK_BLOCK))
 		{
-			System.out.println("sneaky right click");
+			if(oldX != x || oldY != y || oldZ != z)
+			{
+				resetMetadataOptions(world, x, y, z);
+				oldX = x;
+				oldY = y;
+				oldZ = z;
+			}
+			
 			if(block.getClass().equals(DTBlock.class))
 			{
-				((DTBlock) block).moveTorchManually(world, x, y, z);
+				((DTBlock) block).moveTorchManually(world, x, y, z, metadataOptions);
 				event.setCanceled(true);
 			}
 		}
 	}
 	
-	//TODO: probably different data structure
-	//TODO: increase history? 9 possible states --> check maximum of 8 previous metadata values for new metadata value not present
-	//TODO: Reset metadata if new torch is clicked? check world position to find out if clicked block changed
-	public void updateMetadataHistory(int metadata)
+	/**
+	 * Called when the metadataOptions (alias the available torch positions) change.
+	 * @param world
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
+	public void updateOptions(World world, int x, int y, int z)
 	{
-		System.out.println("Old History: " + metadataHistory[0] + ", " + metadataHistory[1] + ", " + metadataHistory[2] + ", " + metadataHistory[3]);
-		int[] tmpHistory = new int[4];
-		for(int i = 0; i<3; i++)
+		if(world.isSideSolid(x - 1, y, z, EAST))
 		{
-			tmpHistory[i] = metadataHistory[i+1];
+			metadataOptions[0] = 1;
+			
+			if(world.isSideSolid(x, y, z + 1, NORTH))
+			{
+				metadataOptions[5] = 6;
+			}
+			
+			if(world.isSideSolid(x, y, z - 1, SOUTH))
+			{
+				metadataOptions[7] = 8;
+			}
 		}
-		tmpHistory[3] = metadata;
-		metadataHistory = tmpHistory;
-		System.out.println("New History: " + metadataHistory[0] + ", " + metadataHistory[1] + ", " + metadataHistory[2] + ", " + metadataHistory[3]);
+
+		if(world.isSideSolid(x + 1, y, z, WEST))
+		{
+			metadataOptions[1] = 2;
+			
+			if(world.isSideSolid(x, y, z + 1, NORTH))
+			{
+				metadataOptions[6] = 7;
+			}
+			
+			if(world.isSideSolid(x, y, z - 1, SOUTH))
+			{
+				metadataOptions[8] = 9;
+			}
+		}
+
+		if(world.isSideSolid(x, y, z - 1, SOUTH))
+		{
+			metadataOptions[2] = 3;
+		}
+
+		if(world.isSideSolid(x, y, z + 1, NORTH))
+		{
+			metadataOptions[3] = 4;
+		}
+
+		if (World.doesBlockHaveSolidTopSurface(world, x, y - 1, z))
+		{
+			metadataOptions[4] = 5;
+		}
+		else
+		{
+			Block block = world.getBlock(x, y, z);
+			if(block.canPlaceTorchOnTop(world, x, y - 1, z))
+			{
+				metadataOptions[4] = 5;
+			}
+		}
+		
+		metadataOptions[9] = world.getBlockMetadata(x, y, z);
 	}
 	
-	public int[] getMetadataHistory()
+	/**
+	 * Called whenever the torches neighbors change or the torch right clicked is a new one.
+	 * 
+	 * @param world
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
+	public void resetMetadataOptions(World world, int x, int y, int z)
 	{
-		return metadataHistory;
+		metadataOptions = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		updateOptions(world, x, y, z);
+	}
+
+	//Currently unused. Probably will be removed.
+	public void updateMetadataHistory(int metadata)
+	{
+		System.out.println("Old History: " + metadataOptions[0] + ", " + metadataOptions[1] + ", " + metadataOptions[2] + ", " + metadataOptions[3]);
+		int[] tmpOptions = new int[8];
+		for(int i = 0; i<7; i++)
+		{
+			tmpOptions[i] = metadataOptions[i+1];
+		}
+		tmpOptions[3] = metadata;
+		metadataOptions = tmpOptions;
+		System.out.println("New History: " + metadataOptions[0] + ", " + metadataOptions[1] + ", " + metadataOptions[2] + ", " + metadataOptions[3]);
+	}
+	
+	public int[] getMetadataOptions()
+	{
+		return metadataOptions;
 	}
 
 	/**
