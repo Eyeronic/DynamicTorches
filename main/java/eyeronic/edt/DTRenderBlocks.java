@@ -1,9 +1,13 @@
 package eyeronic.edt;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.world.ChunkCache;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import eyeronic.edt.init.DynamicTorches;
 
 public class DTRenderBlocks extends RenderBlocks {
@@ -63,7 +67,14 @@ public class DTRenderBlocks extends RenderBlocks {
             this.renderTorchAtAngle(block, (double)x + d1, (double)y + d2, (double)z - d1, d0, -d0, 0);
         }
         else
+        {
+        	if(metadata == 0)
+        	{
+        		
+        	}
+        	//System.out.println("RenderBlockTorch with metadata: " + metadata + " @ " + x + ", " + y + ", " + z);
         	return super.renderBlockTorch(block, x, y, z);
+        }
         
         return true;
     }

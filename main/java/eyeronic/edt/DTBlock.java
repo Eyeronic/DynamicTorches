@@ -11,9 +11,13 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import eyeronic.edt.init.DynamicTorches;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockAir;
+import net.minecraft.block.BlockSlab;
 import net.minecraft.block.BlockTorch;
+import net.minecraft.block.material.Material;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class DTBlock extends BlockTorch {
@@ -24,6 +28,7 @@ public class DTBlock extends BlockTorch {
 	{
 		//TODO: setters really needed?
 		super();
+		System.out.println(Material.circuits == getMaterial());
 		this.setLightLevel(super.getAmbientOcclusionLightValue());
 		this.setTickRandomly(true);
 		this.setRenderType(DynamicTorches.dtRenderID);
@@ -252,7 +257,7 @@ public class DTBlock extends BlockTorch {
 				j1 = 1;
 			}
 		}
-
+		
 		return j1;
 	}
 
@@ -323,6 +328,7 @@ public class DTBlock extends BlockTorch {
 		}
 		else
 		{
+			System.out.println("Calling super.onBlockAdded");
 			super.onBlockAdded(world, x, y, z);
 		}
 	}
@@ -382,6 +388,7 @@ public class DTBlock extends BlockTorch {
 		}
 		else
 		{
+			System.out.println("Calling super.onBlockAdded.");
 			super.onBlockAdded(world, x, y, z);
 		}
 	}
@@ -399,10 +406,10 @@ public class DTBlock extends BlockTorch {
 		else if(!this.getClass().equals(block.getClass()))//true if torches should move to any valid position
 		{
 			//resetting metadata to 0 for rotation update
-			world.setBlockMetadataWithNotify(x, y, z, 0, 2);
+			//world.setBlockMetadataWithNotify(x, y, z, 0, 2);
 			this.onBlockAdded(world, x, y, z);
 		}
-		
+
 		//resetting available torch positions to choose from as these might have changed
 		DynamicTorches.instance.resetMetadataOptions(world, x, y, z);
 	}	
@@ -419,11 +426,46 @@ public class DTBlock extends BlockTorch {
 	public void moveTorchManually(World world, int x, int y, int z, int[] metadataOptions)
 	{
 		int nextMetadata = getNextMetadata(metadataOptions, metadataOptions[9]);
-		
+
 		world.setBlockMetadataWithNotify(x, y, z, nextMetadata, 2);
 		DynamicTorches.instance.updateOptions(world, x, y, z);
 	}
-	
+
+	public int getMixedBrightnessForBlock(IBlockAccess blockAccess, int x, int y, int z)
+	{
+		Block block = blockAccess.getBlock(x, y, z);
+
+		/*System.out.println(blockAccess);
+		System.out.println(block);
+		System.out.println(blockAccess.getBlockMetadata(x, y, z));
+
+		//TODO: Use ChunkCoords from DynamicTorches.onChunkEntered to redraw torches when crossing chunk borders?
+		System.out.println("Block: " + block);
+		if(blockAccess.getBlockMetadata(x, y, z) == 0 && block.getClass().equals(this.getClass()))
+		{
+			System.out.println("METADATA IS 0!");
+		}*/
+		int l;
+
+		if(!block.getClass().equals(BlockAir.class))
+			l = blockAccess.getLightBrightnessForSkyBlocks(x, y, z, block.getLightValue(blockAccess, x, y, z));//240;//EnumSkyBlock.Sky.defaultLightValue;
+		else
+		{
+			l = 0;
+		}
+
+		if (l == 0 && block instanceof BlockSlab)
+		{
+			--y;
+			block = blockAccess.getBlock(x, y, z);
+			return blockAccess.getLightBrightnessForSkyBlocks(x, y, z, block.getLightValue(blockAccess, x, y, z));
+		}
+		else
+		{
+			return l;
+		}
+	}
+
 	/**
 	 * Returns the next available position for the given options and the current position
 	 * 
@@ -439,7 +481,7 @@ public class DTBlock extends BlockTorch {
 			return getNextMetadata(metadataOptions, currentMetadata+1);
 		else
 			return getNextMetadata(metadataOptions, 0);
-			
+
 	}
 
 	/**

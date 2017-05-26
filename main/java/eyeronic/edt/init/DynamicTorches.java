@@ -140,6 +140,8 @@ public class DynamicTorches {
 				oldZ = z;
 			}
 			
+			System.out.println(block + ": " + world.getBlockMetadata(x, y, z));
+			
 			if(block.getClass().equals(DTBlock.class))
 			{
 				((DTBlock) block).moveTorchManually(world, x, y, z, metadataOptions);
@@ -271,7 +273,7 @@ public class DynamicTorches {
 							Property.Type.BOOLEAN);
 			
 			Property isFirstRunProp =
-					config.get(Configuration.CATEGORY_SPLITTER + "first run",
+					config.get("first run",
 							"isFirstRun",
 							"true",
 							"Whether this is the first time this mod is used",
