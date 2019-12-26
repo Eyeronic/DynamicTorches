@@ -35,6 +35,7 @@ Automatic modes can be used on servers only by either the server owner or any op
 - [x] Manually change a torch's position (via metadata) by right-clicking the torch.
 - [x] Automatically update torch metadata on loading a save game which previously didn't use Dynamic Torches (aka move all torches into corners where possible).
 - [ ] Add compatibility with HitchH1k3r's [Torch Levers](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1288257-1-7-10-forge-torch-levers-and-more-version-1-4-2) mod if there is a 1.12.2 version.
+- [ ] Port to other Minecraft versions
 
 ## Notes
 
