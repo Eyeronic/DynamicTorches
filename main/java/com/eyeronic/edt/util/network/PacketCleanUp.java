@@ -56,56 +56,36 @@ public class PacketCleanUp implements IMessage{
 		return isCleanUpActive;
 	}
 
-	public void setCleanUpActive(boolean isCleanUpActive) {
-		this.isCleanUpActive = isCleanUpActive;
-	}
-
 	public BlockPos getPos() {
 		return pos;
-	}
-
-	public void setPos(BlockPos pos) {
-		this.pos = pos;
 	}
 
 	public EnumFacing getFacing() {
 		return facing;
 	}
 
-	public void setFacing(EnumFacing facing) {
-		this.facing = facing;
-	}
-
 	public EnumFacing getExtraFacing() {
 		return extraFacing;
-	}
-
-	public void setExtraFacing(EnumFacing extraFacing) {
-		this.extraFacing = extraFacing;
 	}
 
 	public static class CleanUpMessageHandler implements IMessageHandler<PacketCleanUp, IMessage> {
 		@Override
 		public IMessage onMessage(PacketCleanUp message, MessageContext ctx) {
-			//DynamicTorches.proxy.addScheduledTaskClient(() -> handle(message, ctx));
 			handle(message, ctx);
 			return null;
 		}
 		
 		private void handle(PacketCleanUp message, MessageContext ctx) {
 			if(ctx.side == Side.SERVER) {
-				DynamicTorches.log("Message recieved server side! Pos: " + message.getPos() + ", Facing: " + message.getFacing() + ", ExtraFacing: " + message.getExtraFacing());
 				int playerPermissionLevel = ctx.getServerHandler().player.getServer().getPlayerList().getOppedPlayers().getPermissionLevel(ctx.getServerHandler().player.getGameProfile());
-				DynamicTorches.log("opped playerlist length: " + ctx.getServerHandler().player.getServer().getPlayerList().getOppedPlayerNames().length + "\npermission level for player " + ctx.getServerHandler().player + " is " + playerPermissionLevel);
+				
 				if(playerPermissionLevel >= 1 || ctx.getServerHandler().player.getServer().getServerOwner().equals(ctx.getServerHandler().player.getName())) {
 					ctx.getServerHandler().player.world.setBlockState(message.getPos(), ctx.getServerHandler().player.world.getBlockState(message.getPos()).withProperty(BlockTorch.FACING, message.getFacing()).withProperty(BlockDynamicTorch.EXTRA_FACING,  message.getExtraFacing()));
 				}
-				else
-					return;
 			}		
 			//client side pretty much does nothing, as setblock is handled server side only
 			else {
-				DynamicTorches.log("Message recieved client side! Pos: " + message.getPos() + ", Facing: " + message.getFacing() + ", ExtraFacing: " + message.getExtraFacing());
+				
 			}
 		}
 	}

@@ -20,14 +20,4 @@ public class CommonProxy {
 	public void registerItemRenderer(Item item, int meta, String id) {
 		
 	}
-	
-	/*public ListenableFuture<Object> addScheduledTaskClient(Runnable runnableToSchedule) {
-		
-		
-		return null;
-	}
-	
-	public EntityPlayer getClientPlayer() {
-		throw new IllegalStateException("This should only be called from client side!");
-	}*/
 }
